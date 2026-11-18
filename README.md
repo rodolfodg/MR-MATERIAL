@@ -19,10 +19,9 @@ Aplicação web de gestão para lojas de materiais de construção, desenvolvida
 
 ## 3. Como executar o projeto
 
-1. Extraia o arquivo ZIP do projeto.
-2. Abra a pasta `mr-material-construcao` no Visual Studio Code.
-3. Abra o terminal na pasta raiz do projeto.
-4. Instale as dependências:
+1. Abra a pasta `mr-material-construcao` no Visual Studio Code.
+2. Abra o terminal na pasta raiz do projeto.
+3. Instale as dependências:
 
 ```bash
 npm install

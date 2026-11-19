@@ -1,126 +1,83 @@
 # MR – Material de Construção
 
-Aplicação web de gestão para lojas de materiais de construção, desenvolvida com **React, Vite e React Router DOM**, com interface responsiva e armazenamento local dos dados.
+Aplicação de gestão de materiais de construção desenvolvida com **React 18, Vite 6, TypeScript e React Router DOM**. Contém os módulos Produtos (A), Clientes (B) e Orçamentos (C), além de dashboard, estoque, relatórios informativos e acesso demonstrativo.
 
-## 1. Tecnologias utilizadas
+## Identificação da entrega
 
-- React
-- Vite
-- JavaScript (JSX)
-- React Router DOM
-- CSS3
-- LocalStorage
+- **Projeto:** MR – Material de Construção
+- **Autor(a):** PREENCHER NOME COMPLETO
+- **Turma:** PREENCHER TURMA
+- **Repositório GitHub:** PREENCHER URL DO REPOSITÓRIO
+- **Checkpoint:** dia 23, até 23h59 — módulos A e B
+- **Entrega final:** dia 25, até 23h59 — módulos A, B e qualidade arquitetural; módulo C para bônus
 
-## 2. Requisitos para execução
+## Executar
 
-- Node.js 18 ou superior
-- npm
-- Visual Studio Code (recomendado)
-
-## 3. Como executar o projeto
-
-1. Abra a pasta `mr-material-construcao` no Visual Studio Code.
-2. Abra o terminal na pasta raiz do projeto.
-3. Instale as dependências:
+Requer Node.js 18+ e npm.
 
 ```bash
 npm install
-```
-
-5. Inicie o servidor de desenvolvimento:
-
-```bash
+cp .env.example .env
 npm run dev
 ```
 
-6. Acesse o endereço informado pelo Vite, normalmente:
+No Windows, copie manualmente `.env.example` para `.env` ou execute `copy .env.example .env` no Prompt de Comando. Abra o endereço exibido pelo Vite (normalmente http://localhost:5173).
 
-[http://localhost:5173](http://localhost:5173)
+## Configuração da API
 
-## 4. Funcionalidades implementadas
+Por padrão, `.env.example` contém `VITE_API_URL=/api`. O Vite encaminha chamadas `/api/*` para `http://localhost:3000`, portanto **o backend local deve estar em execução**. Para usar a API online, edite `VITE_API_URL` com a URL base correta, verificada na documentação Swagger:
 
-### Dashboard
-- Painel inicial com indicadores da loja.
-- Resumo das informações de produtos, clientes e movimentações.
+https://winnicius.com/tecinfo/labs/api-mr-construcao/docs/
 
-### Produtos
-- Cadastro de produtos.
-- Consulta, edição e exclusão.
-- Pesquisa por código, nome ou código de barras.
-- Informações de marca, preço e estoque.
-- Controle de estoque mínimo.
-- Informações de validade e promoção.
-- Cadastro de custo, preço de venda e taxa de lucro.
+**Atenção:** a compatibilidade exata dos campos do payload e o prefixo online dependem da documentação oficial e precisam ser validados no ambiente do professor. O proxy local não resolve problemas de CORS em requisições diretas à API online.
 
-### Clientes
-- Cadastro de clientes.
-- Consulta, edição e exclusão.
-- Registro de telefone e endereço.
+## Funcionalidades
 
-### Estoque
-- Consulta dos produtos cadastrados.
-- Visualização das quantidades disponíveis.
-- Alertas de estoque mínimo.
+### Módulo A — Produtos (obrigatório)
 
-### Orçamentos
-- Criação de orçamentos.
-- Seleção de clientes.
-- Pesquisa e seleção de produtos.
-- Definição de quantidades.
-- Aplicação de descontos.
-- Cálculo do valor total.
-- Impressão de orçamentos.
+- `GET /api/produtos`: tabela com código, nome, marca, preço, estoque e unidade; pesquisa; loading e erro.
+- `POST /api/produtos`: formulário controlado com EAN-13, marca, família, preço, estoque e unidade.
+- `PUT /api/produtos/:id`: edição usando o mesmo formulário de cadastro.
+- `DELETE /api/produtos/:id`: exclusão com confirmação e atualização da listagem.
 
-### Vendas
-- Registro demonstrativo de vendas.
-- Seleção de produtos e quantidades.
+### Módulo B — Clientes (obrigatório)
 
-### Configurações
-- Configuração de taxas de juros.
-- Parcelamento de 1x a 10x.
+- `GET /api/clientes`: listagem com nome, telefone, bairro, cidade e ponto de referência.
+- `POST /api/clientes`: cadastro com rua, número, bairro, cidade, CEP e ponto de referência obrigatório.
+- `PUT /api/clientes/:id`: edição do cadastro.
+- `DELETE /api/clientes/:id`: exclusão com confirmação.
 
-### Relatórios
-- Consulta de vendas e orçamentos.
-- Visualização dos registros.
-- Opção de impressão.
+### Módulo C — Orçamentos (bônus)
 
-### Despesas
-- Lançamento de despesas.
-- Consulta dos registros cadastrados.
+- Seleção de cliente, vendedor e produtos.
+- Quantidade, subtotais reativos, remoção de itens e desconto.
+- Forma de pagamento à vista, com desconto ou parcelada de 1x a 10x.
+- `POST /api/orcamentos`: envio de orçamento à API.
+- `GET /api/orcamentos`: listagem dos orçamentos e status retornados.
 
-## 5. Persistência de dados
+### Outros recursos
 
-Os cadastros deste protótipo são armazenados no `localStorage` do navegador.
+- Dashboard e consulta de estoque com indicadores obtidos da API.
+- Rotas com `Outlet`, tipagem TypeScript e estados de carregamento/erro.
+- Login e redefinição de senha **somente demonstrativos**, usando armazenamento local. **Não é autenticação segura, não envia e-mail e não protege os endpoints da API.**
+- Relatórios e vendas são telas informativas; emissão fiscal e baixa automática de estoque não foram implementadas.
 
-Isso permite manter os dados no mesmo navegador após atualizar ou fechar a página.
+## Verificação antes da entrega
 
-**Importante:** o armazenamento local não substitui um backend ou banco de dados. Os dados não são compartilhados automaticamente entre computadores ou usuários diferentes.
+```bash
+npm run typecheck
+npm run build
+npm run dev
+```
 
-## 6. Responsividade
+Testar manualmente criação, edição, listagem e exclusão de produtos e clientes; endereço e ponto de referência; inclusão de vários itens; cálculo dos totais; gravação do orçamento; erros HTTP; console sem avisos de `key`; e configuração de CORS. **A presença de código não comprova o funcionamento da API.**
 
-A interface foi estruturada para funcionar em:
+## GitHub
 
-- Computadores (desktop).
-- Tablets.
-- Celulares.
+```bash
+git add .
+git commit -m "feat: integra modulos de produtos clientes e orcamentos"
+git push origin main
+```
 
-O layout se adapta aos diferentes tamanhos de tela, facilitando o acesso às funcionalidades do sistema.
-
-## 7. Limitações e melhorias futuras
-
-O projeto representa um protótipo funcional de gestão comercial. Algumas funcionalidades ainda precisam de implementação complementar para uso em ambiente de produção:
-
-- Autenticação e controle de acesso por usuário.
-- Backend e banco de dados centralizado.
-- Emissão de notas fiscais.
-- Integração com meios de pagamento.
-- Baixa automática de estoque após a venda.
-- Relatórios reais de compras.
-- Controle completo de entradas e saídas de mercadorias.
-- Backup e recuperação de dados.
-
-## 8. Considerações finais
-
-O **MR – Material de Construção** tem como objetivo facilitar o gerenciamento das atividades de uma loja de materiais de construção, reunindo em uma única aplicação o controle de produtos, clientes, estoque, orçamentos, vendas, despesas e relatórios.
-
-A estrutura foi desenvolvida para permitir futuras expansões, integrações e melhorias.
+Preencha a identificação acima antes de enviar o link do repositório.

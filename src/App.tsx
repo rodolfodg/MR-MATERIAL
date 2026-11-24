@@ -8,10 +8,11 @@ import { Clients, ClientForm } from './pages/Clients';
 import { Quotes } from './pages/Quotes';
 import { apiBase, clientsApi, productsApi } from './services/api';
 import type { Client, Product } from './types/models';
+import { getToken } from './services/auth';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  return sessionStorage.getItem('mr_demo_session') ? <>{children}</> : <Navigate to="/login" replace state={{ from: location }} />;
+  return getToken() ? <>{children}</> : <Navigate to="/login" replace state={{ from: location }} />;
 }
 
 function Dashboard() {

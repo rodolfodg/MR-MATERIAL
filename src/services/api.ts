@@ -1,4 +1,5 @@
 import type { Client, Product, Quote } from '../types/models';
+import { getToken } from './auth';
 
 const ROOT = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 export const apiBase = ROOT;
@@ -30,6 +31,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
       headers: {
         Accept: 'application/json',
         ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
         ...options.headers
       }
     });

@@ -1,39 +1,28 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import { productsApi } from '../services/api';
+import { useListarProdutosQuery, useObterProdutoPorIdQuery, useCriarProdutoMutation, useAtualizarProdutoMutation, useExcluirProdutoMutation } from '../services/rtkApi';
 import type { Product } from '../types/models';
+
+const apiError = (cause: unknown): string => {
+  if (cause && typeof cause === 'object' && 'data' in cause) {
+    const data = (cause as { data?: { message?: string | string[] } }).data;
+    if (data?.message) return Array.isArray(data.message) ? data.message.join('; ') : data.message;
+  }
+  return cause instanceof Error ? cause.message : 'Falha na comunicação com a API.';
+};
 
 export const currency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
 
 export function Products() {
-  const [items, setItems] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: items = [], isLoading: loading, isError, error: queryError, refetch } = useListarProdutosQuery();
+  const [excluirProduto, deleting] = useExcluirProdutoMutation();
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-
-  async function refresh() {
-    setLoading(true);
-    setError('');
-    try {
-      setItems(await productsApi.list());
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Falha ao consultar produtos.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { void refresh(); }, []);
-
   async function remove(item: Product) {
     if (!window.confirm(`Excluir o produto ${item.nome}?`)) return;
-    try {
-      await productsApi.remove(item.id);
-      await refresh();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Erro ao excluir produto.');
-    }
+    try { await excluirProduto(item.id).unwrap(); setError(''); }
+    catch (cause) { setError(apiError(cause)); }
   }
 
   const filtered = items.filter(item => `${item.id} ${item.nome} ${item.codigoBarras} ${item.marca}`.toLowerCase().includes(query.toLowerCase()));
@@ -44,9 +33,9 @@ export function Products() {
       <section className="panel">
         <div className="panel-head"><h3>Produtos cadastrados</h3><label className="searchbox"><Search size={16} /><input aria-label="Pesquisar produtos" value={query} onChange={e => setQuery(e.target.value)} placeholder="Código, nome, marca ou EAN" /></label></div>
         {loading && <p role="status">Carregando produtos...</p>}
-        {error && <div className="alert error" role="alert">{error} <button className="btn secondary" onClick={() => void refresh()}>Tentar novamente</button></div>}
-        {!loading && !error && <div className="table-wrap"><table><thead><tr><th>Código</th><th>Nome do produto</th><th>Marca</th><th>Preço de venda</th><th>Estoque atual</th><th>Unidade</th><th>Ações</th></tr></thead><tbody>
-          {filtered.map(produto => <tr key={produto.id}><td className="code">{produto.id}</td><td><b>{produto.nome}</b></td><td>{produto.marca}</td><td>{currency(Number(produto.precoVenda))}</td><td><span className={Number(produto.estoqueAtual) <= Number(produto.estoqueMinimo || 0) ? 'pill warning' : 'pill success'}>{produto.estoqueAtual}</span></td><td>{produto.unidade}</td><td><div className="actions"><Link className="icon-button" aria-label={`Editar ${produto.nome}`} to={`/produtos/${produto.id}/editar`}><Pencil size={16} /></Link><button aria-label={`Excluir ${produto.nome}`} onClick={() => void remove(produto)}><Trash2 size={16} /></button></div></td></tr>)}
+        {(error || isError) && <div className="alert error" role="alert">{error || apiError(queryError)} <button className="btn secondary" onClick={() => void refetch()}>Tentar novamente</button></div>}
+        {!loading && !error && !isError && <div className="table-wrap"><table><thead><tr><th>Código</th><th>Nome do produto</th><th>Marca</th><th>Preço de venda</th><th>Estoque atual</th><th>Unidade</th><th>Ações</th></tr></thead><tbody>
+          {filtered.map(produto => <tr key={produto.id}><td className="code">{produto.id}</td><td><b>{produto.nome}</b></td><td>{produto.marca}</td><td>{currency(Number(produto.precoVenda))}</td><td><span className={Number(produto.estoqueAtual) <= Number(produto.estoqueMinimo || 0) ? 'pill warning' : 'pill success'}>{produto.estoqueAtual}</span></td><td>{produto.unidade}</td><td><div className="actions"><Link className="icon-button" aria-label={`Editar ${produto.nome}`} to={`/produtos/${produto.id}/editar`}><Pencil size={16} /></Link><button aria-label={`Excluir ${produto.nome}`} disabled={deleting.isLoading} onClick={() => void remove(produto)}><Trash2 size={16} /></button></div></td></tr>)}
           {filtered.length === 0 && <tr><td colSpan={7} className="empty">Nenhum produto encontrado.</td></tr>}
         </tbody></table></div>}
       </section>
@@ -64,20 +53,16 @@ export function ProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState<Omit<Product, 'id'>>(blank);
-  const [loading, setLoading] = useState(Boolean(id));
-  const [saving, setSaving] = useState(false);
+  const { data: product, isLoading: loading, isError: loadError } = useObterProdutoPorIdQuery(id || '', { skip: !id });
+  const [criarProduto, creating] = useCriarProdutoMutation();
+  const [atualizarProduto, updating] = useAtualizarProdutoMutation();
+  const saving = creating.isLoading || updating.isLoading;
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!id) return;
-    let active = true;
-    productsApi.get(id).then(product => {
-      if (active) setForm({ ...blank, ...product });
-    }).catch(cause => {
-      if (active) setError(cause instanceof Error ? cause.message : 'Falha ao carregar produto.');
-    }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [id]);
+  const [loadedId, setLoadedId] = useState('');
+  if (id && product && loadedId !== id) {
+    setForm({ ...blank, ...product });
+    setLoadedId(id);
+  }
 
   function change<K extends keyof Omit<Product, 'id'>>(key: K, value: Omit<Product, 'id'>[K]) {
     setForm(previous => ({ ...previous, [key]: value }));
@@ -93,16 +78,13 @@ export function ProductForm() {
       setError('Preencha os campos obrigatórios e informe valores não negativos.');
       return;
     }
-    setSaving(true);
     setError('');
     try {
-      if (id) await productsApi.update(id, form);
-      else await productsApi.create(form);
+      if (id) await atualizarProduto({ id, dados: form }).unwrap();
+      else await criarProduto(form).unwrap();
       navigate('/produtos');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Falha ao salvar produto.');
-    } finally {
-      setSaving(false);
+      setError(apiError(cause));
     }
   }
 
@@ -114,7 +96,7 @@ export function ProductForm() {
     <>
       <div className="page-heading"><div><h2>{id ? 'Editar produto' : 'Cadastrar produto'}</h2><p>Preencha os dados do material de construção.</p></div><Link className="btn secondary" to="/produtos">Voltar</Link></div>
       <section className="panel product-registration">
-        {loading ? <p>Carregando produto...</p> : <form onSubmit={submit}>
+        {loading ? <p>Carregando produto...</p> : loadError ? <p className="alert error">Falha ao carregar produto da API.</p> : <form onSubmit={submit}>
           <div className="form-grid">
             {field('Nome do produto *', 'nome', 'text', true)}
             {field('Código de barras (EAN-13) *', 'codigoBarras', 'text', true)}

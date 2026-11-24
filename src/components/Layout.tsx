@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logout as clearAuth } from '../services/auth';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Boxes, ChartNoAxesCombined, ClipboardList, House, LogOut, Menu, Package, ShoppingCart, Users, X } from 'lucide-react';
 
@@ -17,7 +18,7 @@ export default function Layout() {
   const navigate = useNavigate();
 
   function logout() {
-    sessionStorage.removeItem('mr_demo_session');
+    clearAuth();
     navigate('/login', { replace: true });
   }
 

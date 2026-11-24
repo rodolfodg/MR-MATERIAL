@@ -20,7 +20,7 @@ export interface Product {
 
 export interface Client {
   id: string;
-  nome: string;
+  nomeCliente: string;
   telefone: string;
   rua: string;
   numero: string;

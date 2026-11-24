@@ -2,15 +2,6 @@
 
 Aplicação de gestão de materiais de construção desenvolvida com **React 18, Vite 6, TypeScript e React Router DOM**. Contém os módulos Produtos (A), Clientes (B) e Orçamentos (C), além de dashboard, estoque, relatórios informativos e acesso demonstrativo.
 
-## Identificação da entrega
-
-- **Projeto:** MR – Material de Construção
-- **Autor(a):** PREENCHER NOME COMPLETO
-- **Turma:** PREENCHER TURMA
-- **Repositório GitHub:** PREENCHER URL DO REPOSITÓRIO
-- **Checkpoint:** dia 23, até 23h59 — módulos A e B
-- **Entrega final:** dia 25, até 23h59 — módulos A, B e qualidade arquitetural; módulo C para bônus
-
 ## Executar
 
 Requer Node.js 18+ e npm.
@@ -29,25 +20,25 @@ Por padrão, `.env.example` contém `VITE_API_URL=/api`. O Vite encaminha chamad
 
 https://winnicius.com/tecinfo/labs/api-mr-construcao/docs/
 
-**Atenção:** a compatibilidade exata dos campos do payload e o prefixo online dependem da documentação oficial e precisam ser validados no ambiente do professor. O proxy local não resolve problemas de CORS em requisições diretas à API online.
+
 
 ## Funcionalidades
 
-### Módulo A — Produtos (obrigatório)
+### Módulo A — Produtos 
 
 - `GET /api/produtos`: tabela com código, nome, marca, preço, estoque e unidade; pesquisa; loading e erro.
 - `POST /api/produtos`: formulário controlado com EAN-13, marca, família, preço, estoque e unidade.
 - `PUT /api/produtos/:id`: edição usando o mesmo formulário de cadastro.
 - `DELETE /api/produtos/:id`: exclusão com confirmação e atualização da listagem.
 
-### Módulo B — Clientes (obrigatório)
+### Módulo B — Clientes 
 
 - `GET /api/clientes`: listagem com nome, telefone, bairro, cidade e ponto de referência.
 - `POST /api/clientes`: cadastro com rua, número, bairro, cidade, CEP e ponto de referência obrigatório.
 - `PUT /api/clientes/:id`: edição do cadastro.
 - `DELETE /api/clientes/:id`: exclusão com confirmação.
 
-### Módulo C — Orçamentos (bônus)
+### Módulo C — Orçamentos 
 
 - Seleção de cliente, vendedor e produtos.
 - Quantidade, subtotais reativos, remoção de itens e desconto.
@@ -69,15 +60,3 @@ npm run typecheck
 npm run build
 npm run dev
 ```
-
-Testar manualmente criação, edição, listagem e exclusão de produtos e clientes; endereço e ponto de referência; inclusão de vários itens; cálculo dos totais; gravação do orçamento; erros HTTP; console sem avisos de `key`; e configuração de CORS. **A presença de código não comprova o funcionamento da API.**
-
-## GitHub
-
-```bash
-git add .
-git commit -m "feat: integra modulos de produtos clientes e orcamentos"
-git push origin main
-```
-
-Preencha a identificação acima antes de enviar o link do repositório.
